@@ -24,33 +24,33 @@ const Profile = () => {
   const userId = parseInt(useLocation().pathname.split("/")[2]);
 
   const { isLoading, error, data } = useQuery(["user"], () =>
-    makeRequest.get("/users/find/" + userId).then((res) => {
-      return res.data;
-    })
+      makeRequest.get("/users/find/" + userId).then((res) => {
+        return res.data;
+      })
   );
 
   const { isLoading: rIsLoading, data: relationshipData } = useQuery(
-    ["relationship"],
-    () =>
-      makeRequest.get("/relationships?followedUserId=" + userId).then((res) => {
-        return res.data;
-      })
+      ["relationship"],
+      () =>
+          makeRequest.get("/relationships?followedUserId=" + userId).then((res) => {
+            return res.data;
+          })
   );
 
   const queryClient = useQueryClient();
 
   const mutation = useMutation(
-    (following) => {
-      if (following)
-        return makeRequest.delete("/relationships?userId=" + userId);
-      return makeRequest.post("/relationships", { userId });
-    },
-    {
-      onSuccess: () => {
-        // Invalidate and refetch
-        queryClient.invalidateQueries(["relationship"]);
+      (following) => {
+        if (following)
+          return makeRequest.delete("/relationships?userId=" + userId);
+        return makeRequest.post("/relationships", { userId });
       },
-    }
+      {
+        onSuccess: () => {
+          // Invalidate and refetch
+          queryClient.invalidateQueries(["relationship"]);
+        },
+      }
   );
 
   const handleFollow = () => {
@@ -58,69 +58,69 @@ const Profile = () => {
   };
 
   return (
-    <div className="profile">
-      {isLoading ? (
-        "loading"
-      ) : (
-        <>
-          <div className="images">
-            <img src={"/upload/"+data.coverPic} alt="" className="cover" />
-            <img src={"/upload/"+data.profilePic} alt="" className="profilePic" />
-          </div>
-          <div className="profileContainer">
-            <div className="uInfo">
-              <div className="left">
-                <a href="http://facebook.com">
-                  <FacebookTwoToneIcon fontSize="large" />
-                </a>
-                <a href="http://facebook.com">
-                  <InstagramIcon fontSize="large" />
-                </a>
-                <a href="http://facebook.com">
-                  <TwitterIcon fontSize="large" />
-                </a>
-                <a href="http://facebook.com">
-                  <LinkedInIcon fontSize="large" />
-                </a>
-                <a href="http://facebook.com">
-                  <PinterestIcon fontSize="large" />
-                </a>
+      <div className="profile">
+        {isLoading ? (
+            "loading"
+        ) : (
+            <>
+              <div className="images">
+                <img src={"/upload/"+data.coverPic} alt="" className="cover" />
+                <img src={"/upload/"+data.profilePic} alt="" className="profilePic" />
               </div>
-              <div className="center">
-                <span>{data.name}</span>
-                <div className="info">
-                  <div className="item">
-                    <PlaceIcon />
-                    <span>{data.city}</span>
+              <div className="profileContainer">
+                <div className="uInfo">
+                  <div className="left">
+                    <a href="http://facebook.com">
+                      <FacebookTwoToneIcon fontSize="large" />
+                    </a>
+                    <a href="http://facebook.com">
+                      <InstagramIcon fontSize="large" />
+                    </a>
+                    <a href="http://facebook.com">
+                      <TwitterIcon fontSize="large" />
+                    </a>
+                    <a href="http://facebook.com">
+                      <LinkedInIcon fontSize="large" />
+                    </a>
+                    <a href="http://facebook.com">
+                      <PinterestIcon fontSize="large" />
+                    </a>
                   </div>
-                  <div className="item">
-                    <LanguageIcon />
-                    <span>{data.website}</span>
+                  <div className="center">
+                    <span>{data.name}</span>
+                    <div className="info">
+                      <div className="item">
+                        <PlaceIcon />
+                        <span>{data.city}</span>
+                      </div>
+                      <div className="item">
+                        <LanguageIcon />
+                        <span>{data.website}</span>
+                      </div>
+                    </div>
+                    {rIsLoading ? (
+                        "loading"
+                    ) : userId === currentUser.id ? (
+                        <button onClick={() => setOpenUpdate(true)}>update</button>
+                    ) : (
+                        <button onClick={handleFollow}>
+                          {relationshipData.includes(currentUser.id)
+                              ? "Following"
+                              : "Follow"}
+                        </button>
+                    )}
+                  </div>
+                  <div className="right">
+                    <EmailOutlinedIcon />
+                    <MoreVertIcon />
                   </div>
                 </div>
-                {rIsLoading ? (
-                  "loading"
-                ) : userId === currentUser.id ? (
-                  <button onClick={() => setOpenUpdate(true)}>update</button>
-                ) : (
-                  <button onClick={handleFollow}>
-                    {relationshipData.includes(currentUser.id)
-                      ? "Following"
-                      : "Follow"}
-                  </button>
-                )}
+                <Posts userId={userId} />
               </div>
-              <div className="right">
-                <EmailOutlinedIcon />
-                <MoreVertIcon />
-              </div>
-            </div>
-            <Posts userId={userId} />
-          </div>
-        </>
-      )}
-      {openUpdate && <Update setOpenUpdate={setOpenUpdate} user={data} />}
-    </div>
+            </>
+        )}
+        {openUpdate && <Update setOpenUpdate={setOpenUpdate} user={data} />}
+      </div>
   );
 };
 
